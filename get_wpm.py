@@ -10,7 +10,7 @@ class AverageCalculator():
 
     #  Construction
     def __init__(self):
-        """Will accept integer input from 0 to 180. The average of those 
+        """Will accept integer input from 0 to 299. The average of those 
         numbers are calculated using math.ceil() and then displayed to the user.
         When the user quits the program, the values are automatically stored in
         the same directory as the file."""
