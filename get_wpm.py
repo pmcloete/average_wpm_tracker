@@ -10,7 +10,7 @@ class AverageCalculator():
 
     #  Construction
     def __init__(self):
-        """Will accept integer input from 0 to 299. The average of those 
+        """Will accept integer input from 0 to 299. The average of those
         numbers are calculated using math.ceil() and then displayed to the user.
         When the user quits the program, the values are automatically stored in
         the same directory as the file."""
@@ -105,12 +105,11 @@ class AverageCalculator():
                     #  Must be integers in a valid range
                     if int(values['wpm']) > 0 and int(values['wpm']) < 300:
                         self.data[self.date].append(int(values['wpm']))
-                    pass
                 except Exception as e:
                     # Add a popup to indicate a non integer value
                     self.gui.popup(
                         f'Please enter only numbers from 0 to 300\n{e}')
-                    
+
             if event == self.button_save:
                 #  !Must fix this
                 self._save_backup()
@@ -160,14 +159,14 @@ class AverageCalculator():
             data = {}
             data[self.date] = []
             return data
-        
+
     def _load_backup(self):
         self.backup_used = True
-        self.backup_path = self.gui.popup_get_file("Select a file to upload",font=(self.font, 15), button_color=self.color_button)        
+        self.backup_path = self.gui.popup_get_file("Select a file to upload",font=(self.font, 15), button_color=self.color_button)
         # self.filename = filepath.split('/')[-1]
         with open(self.backup_path, 'r') as f:
             self.data = json.load(f)
-        
+
 
     def _save_file(self):
         #  Save the contents in .json format and quit
@@ -177,8 +176,8 @@ class AverageCalculator():
         else:
             with open(self.backup_path, 'w') as f:
                 json.dump(self.data, f)
-                
-    
+
+
     def _save_backup(self):
         #!Needs work. Plenty
         # TODO: Get the directory from values, call the save file method. Add a popup if successful or not
@@ -188,11 +187,11 @@ class AverageCalculator():
         else:
             self.backup_path = os.path.join(os.getcwd(),(filename + '.json'))
             self.window.SaveToDisk(self.backup_path)
-            
+
 
     def _clear_scores(self):
         self.data[self.date] = []
-        self.current_path = self.os.join(self.os.getcwd, self.filename)
+        self.current_path = self.os.path.join(self.os.getcwd, self.filename)
         self._save_file()
 
     def _plot_scores(self):
