@@ -28,7 +28,7 @@ class AverageCalculator():
         self.file_extension = '.json'
         self.current_path = os.getcwd()
         self.backup_path = ''
-        self.backup_used = False
+        self.backup_used = True
 
         #  UX Elements
         self.font = 'Helvetica'
@@ -176,6 +176,7 @@ class AverageCalculator():
         else:
             with open(self.backup_path, 'w') as f:
                 json.dump(self.data, f)
+            self.backup_used = True
 
 
     def _save_backup(self):
@@ -186,7 +187,8 @@ class AverageCalculator():
             sg.popup_error('No special characters allowed')
         else:
             self.backup_path = os.path.join(os.getcwd(),(filename + '.json'))
-            self.window.SaveToDisk(self.backup_path)
+            print(self.backup_path)
+            self._save_file()
 
 
     def _clear_scores(self):
