@@ -162,11 +162,17 @@ class AverageCalculator():
             return data
 
     def _load_backup(self):
+        self._save_file()
         self.backup_used = True
         self.backup_path = self.gui.popup_get_file("Select a file to upload",font=(self.font, 15), button_color=self.color_button)
-        # self.filename = filepath.split('/')[-1]
-        with open(self.backup_path, 'r') as f:
-            self.data = json.load(f)
+        self.filename = self.backup_path.split('/')[-1]
+        print(self.backup_path)
+        print(self.filename)
+        try:
+            with open(self.backup_path, 'r') as f:
+                self.data = json.load(f)
+        except:
+            pass
 
 
     def _save_file(self):
