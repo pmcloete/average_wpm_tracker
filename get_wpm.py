@@ -28,7 +28,7 @@ class AverageCalculator():
         self.file_extension = '.json'
         self.current_path = os.getcwd()
         self.backup_path = ''
-        self.backup_used = True
+        self.backup_used = False
 
         #  UX Elements
         self.font = 'Helvetica'
@@ -96,6 +96,7 @@ class AverageCalculator():
                 #  Save the data in the current directory
                 #  TODO: Change this to save at file location as per where
                 #        the program is being run from.
+                self.backup_path = ''
                 self._save_file()
                 break
 
@@ -170,25 +171,29 @@ class AverageCalculator():
 
     def _save_file(self):
         #  Save the contents in .json format and quit
-        if not self.backup_used:
+        if not self.backup_used and self.backup_path == '':
             with open(self.os.path.join(self.current_path, self.filename), 'w') as f:
                 json.dump(self.data, f)
         else:
             with open(self.backup_path, 'w') as f:
                 json.dump(self.data, f)
-            self.backup_used = True
+            self.backup_used = False
 
 
     def _save_backup(self):
         #!Needs work. Plenty
         # TODO: Get the directory from values, call the save file method. Add a popup if successful or not
-        filename = self.gui.popup_get_text('Enter the filename')
-        if any(not c.isalnum() for c in filename):
-            sg.popup_error('No special characters allowed')
-        else:
-            self.backup_path = os.path.join(os.getcwd(),(filename + '.json'))
-            print(self.backup_path)
-            self._save_file()
+        filename = self.gui.popup_get_text('Enter the filename', font=(self.font, 15), button_color=self.color_button)
+        try:
+            if any(not c.isalnum() for c in filename):
+                sg.popup_error('No special characters allowed')
+            else:
+                self.backup_path = os.path.join(os.getcwd(),(filename + '.json'))
+                print(self.backup_path)
+                self.backup_used = True
+                self._save_file()
+        except TypeError:
+            pass
 
 
     def _clear_scores(self):
