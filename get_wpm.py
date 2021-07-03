@@ -191,7 +191,7 @@ class AverageCalculator():
 
     def _clear_scores(self):
         self.data[self.date] = []
-        self.current_path = self.os.path.join(self.os.getcwd, self.filename)
+        self.current_path = os.getcwd()
         self._save_file()
 
     def _plot_scores(self):
