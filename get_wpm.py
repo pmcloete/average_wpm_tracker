@@ -18,13 +18,17 @@ class AverageCalculator():
         self.button_add_score = 'Add Score'
         self.button_quit = 'Quit'
         self.button_clear = 'Clear Scores'
-        self.button_create_backup = 'Create Backup'
-        self.button_load_backup = 'Load Backup'
+        self.button_save = 'Save File'
+        self.button_load_file = 'Load File'
         self.size_button = 12, 1
         self.color_button = '#6C6C6C'
 
         #  Default Filename
         self.filename = 'words_per_minute.json'
+        self.file_extension = '.json'
+        self.current_path = os.getcwd()
+        self.backup_path = ''
+        self.backup_used = False
 
         #  UX Elements
         self.font = 'Helvetica'
@@ -59,10 +63,10 @@ class AverageCalculator():
                  self.gui.Button(self.button_add_score, font=(self.font, 15),
                                  button_color=self.color_button)
                  ], [
-                self.gui.Button(self.button_create_backup,
+                self.gui.Button(self.button_load_file,
                                 size=(self.size_button), font=(self.font, 15),
                                 button_color=self.color_button),
-                self.gui.Button(self.button_load_backup,
+                self.gui.Button(self.button_save,
                                 size=(self.size_button), font=(self.font, 15),
                                 button_color=self.color_button),
             ], [
@@ -106,6 +110,13 @@ class AverageCalculator():
                     # Add a popup to indicate a non integer value
                     self.gui.popup(
                         f'Please enter only numbers from 0 to 300\n{e}')
+                    
+            if event == self.button_save:
+                #  !Must fix this
+                self._save_backup()
+
+            if event == self.button_load_file:
+                self._load_backup()
 
             #  Clears the current scores
             if event == self.button_clear:
@@ -138,7 +149,7 @@ class AverageCalculator():
         """Loads the .json saved file. If no file exists, creates an empty
         dictionary with key[date]/value[]"""
         try:
-            with open(self.filename, 'r') as f:
+            with open(self.os.path.join(self.current_path,self.filename), 'r') as f:
                 data = json.load(f)
                 if not data:
                     data = {}
@@ -149,18 +160,40 @@ class AverageCalculator():
             data = {}
             data[self.date] = []
             return data
+        
+    def _load_backup(self):
+        self.backup_used = True
+        self.backup_path = self.gui.popup_get_file("Select a file to upload",font=(self.font, 15), button_color=self.color_button)        
+        # self.filename = filepath.split('/')[-1]
+        with open(self.backup_path, 'r') as f:
+            self.data = json.load(f)
+        
 
-    def _save_file(self, path=''):
-        os.chdir('/Users/peter/Library/Mobile Documents/com~apple~CloudDocs/' +
-                 'PythonMain/projects/pysimplegui_average_wpm')
+    def _save_file(self):
         #  Save the contents in .json format and quit
-        with open(self.filename, 'w') as f:
-            json.dump(self.data, f)
+        if not self.backup_used:
+            with open(self.os.path.join(self.current_path, self.filename), 'w') as f:
+                json.dump(self.data, f)
+        else:
+            with open(self.backup_path, 'w') as f:
+                json.dump(self.data, f)
+                
+    
+    def _save_backup(self):
+        #!Needs work. Plenty
+        # TODO: Get the directory from values, call the save file method. Add a popup if successful or not
+        filename = self.gui.popup_get_text('Enter the filename')
+        if any(not c.isalnum() for c in filename):
+            sg.popup_error('No special characters allowed')
+        else:
+            self.backup_path = os.path.join(os.getcwd(),(filename + '.json'))
+            self.window.SaveToDisk(self.backup_path)
+            
 
     def _clear_scores(self):
         self.data[self.date] = []
-        with open(self.filename, 'w') as f:
-            json.dump(self.data, f)
+        self.current_path = self.os.join(self.os.getcwd, self.filename)
+        self._save_file()
 
     def _plot_scores(self):
         """Plot the scores using matplotlib by date"""
