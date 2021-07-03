@@ -61,17 +61,20 @@ class AverageCalculator():
         self.font = 'Helvetica'
 
         #  Text Elements
-        self.greeting = f'Welcome back, {self.username}!'
+        self.greeting = f'Hi, {self.username}!'
         self.wpm_display = ('Average: ' + str(self.current_average) + ' WPM')
 
         #  App theme
         self.gui.theme('Dark')
         self.gui.theme_button_color(self.color_button)
 
+    def main(self):
+        """A program to store arbitrary values and return the average"""
+        self._initialize()
         #  App Layout
         self.layout = [
             [self.gui.Text(
-                self.greeting, size=(40, 1), justification='left', font=(self.font, 15), key='-USERNAME-')],
+                (f'Hi, {self.username.title()}'), size=(40, 1), justification='left', font=(self.font, 15), key='-USERNAME-')],
             [self.gui.Text(self.wpm_display,
                            size=(20, 1),
                            justification='left', font=(self.font, 25),
@@ -95,33 +98,12 @@ class AverageCalculator():
                     self.font, 10), justification='left')
             ]
         ]
-
         #  Create the App window
         self.window = self.gui.Window('Average WPM Calculator', self.layout,
                                       return_keyboard_events=True)
-
-    def main(self):
-        """A program to store arbitrary values and return the average"""
-        if self.settings['first_load']:
-            username = self.gui.popup_get_text(
-                'Welcome!\nPlease enter your name')
-            self.settings['username'] = username
-            self.settings['last_user'] = username
-            self.username = self.settings['username'].strip().lower()
-            self.filename = self.settings['username']
-            self.file_path = self.os.path.join(
-                self.os.getcwd(), (self.username + '.json'))
-            self._save_file()
-            self.settings['first_load'] = False
-            self._save_settings()
-
-        else:
-            self.username = self.settings['username']
-
+        print(self.username)
         while True:
             event, values = self.window.read()
-            self.window['-USERNAME-'].update(
-                'Welcome back, ' + self._get_username() + '!')
             #  Program quit
             if event == self.gui.WIN_CLOSED or event == self.button_quit:
                 #  Save the data in the current directory
@@ -145,8 +127,10 @@ class AverageCalculator():
                         f'Please enter only numbers from 0 to 300\n{e}')
 
             if event == self.button_create_user:
-                #  !Must fix this
                 self._create_user()
+                #  Update the username when a new user is loaded
+                self.window['-USERNAME-'].update(
+                    'Welcome back, ' + self._get_username() + '!')
 
             if event == self.button_load_user:
                 self._load_new_user()
@@ -162,13 +146,36 @@ class AverageCalculator():
             self.current_average = self._get_average()
             self.window['-AVERAGE-'].update('Average: ' +
                                             str(self.current_average) + ' WPM')
-            # self._update_display_field('-AVERAGE-', self.wpm_display)
-            # self._update_display_field('-USERNAME-', self.greeting)
+
         #  Close the window on exit of event loop
         self.window.close()
 
+    def _initialize(self):
+        """Initializes files and settings if the program is run for the
+        first time"""
+
+        try:
+            if self.settings['first_load']:
+                username = self.gui.popup_get_text(
+                    'Average WPM Calculator\nPlease enter your name')
+                self.settings['username'] = username
+                self.settings['last_user'] = username
+                self.username = self.settings['username'].strip(
+                ).lower()
+                self.filename = self.settings['username']
+                self.file_path = self.os.path.join(
+                    self.os.getcwd(), (self.username + '.json'))
+                self._save_file()
+                self.settings['first_load'] = False
+                self._save_settings()
+            else:
+                self.username = self.settings['username']
+        except Exception as e:
+            quit()
+
     def _load_settings(self):
-        """Load the app setting"""
+        """Load the app setting. Will init an empty settings file on the first
+        run of the program"""
         try:
             with open('settings.json', 'r') as f:
                 return json.load(f)
@@ -177,12 +184,9 @@ class AverageCalculator():
                 return {'first_load': True, 'username': '', 'last_user': ''}
 
     def _save_settings(self):
+        """Save the settings file"""
         with open(self.setting_file_path, 'w') as f:
             json.dump(self.settings, f)
-
-    def _update_display_field(self, field_to_update, text_output):
-        """Updates the average score display in the program"""
-        self.window[field_to_update].update(text_output)
 
     def _get_average(self, contents={}):
         """Returns the average of all the values in the list"""
@@ -197,9 +201,8 @@ class AverageCalculator():
             return 0
 
     def _get_username(self):
-        """Extract the username from the file loaded"""
+        """Returns the username from the settings file"""
         return self.settings['username'].title()
-        return self.filename.split('.')[0].title()
 
     def _load_user(self):
         """Loads the .json saved file. If no file exists, creates an empty
@@ -218,7 +221,7 @@ class AverageCalculator():
             return data
 
     def _load_new_user(self):
-
+        """Loads a different user"""
         try:
             self.file_path = self.gui.popup_get_file("Select the user's file", keep_on_top=True, font=(
                 self.font, 15), button_color=(self.color_button))
@@ -229,7 +232,7 @@ class AverageCalculator():
             pass
 
     def _save_file(self):
-
+        """Saves a users file to disk"""
         #  Makes sure there is something new to write to the file
         if self.add_score_successful or self.create_new_user or self.settings['first_load']:
             print('File Saved')
@@ -239,8 +242,7 @@ class AverageCalculator():
             self.add_score_successful = 0
 
     def _create_user(self):
-        #!Needs work. Plenty
-        # TODO: Get the directory from values, call the Create User method. Add a popup if successful or not
+        """Creates a new user to use the program"""
         username = self.gui.popup_get_text('Enter Username', keep_on_top=True, font=(
             self.font, 15))
         if len(username) > 35:
