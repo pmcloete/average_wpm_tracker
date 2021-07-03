@@ -32,19 +32,18 @@ class AverageCalculator():
         self.button_add_score = 'Add Score'
         self.button_quit = 'Quit'
         self.button_clear = 'Clear Scores'
-        self.button_save = 'Create User'
+        self.button_create_user = 'Create User'
         self.button_load_user = 'Load User'
         self.size_button = 12, 1
         self.color_button = ('white', '#6C6C6C')
 
         #  Files and Path
-        self.filename = 'peter.json'
-        self.username = self._get_username()
+        self.filename = ''
         self.working_directory = os.getcwd()
         self.file_path = self.os.path.join(
             self.working_directory, self.filename)
         self.create_new_user = False
-        self.settings = self._load_settings()
+        self.setting_file_path = os.path.join(os.getcwd(), 'settings.json')
 
         #  Create a date to use as the key in the data dictionary
         self.now = self.datetime.datetime.now()
@@ -52,6 +51,8 @@ class AverageCalculator():
 
         #  Initialize the data
         self.data = self._load_user()
+        self.settings = self._load_settings()
+        self.username = self._get_username()
 
         #  Set the average of the data
         self.current_average = self._get_average()
@@ -82,7 +83,7 @@ class AverageCalculator():
                  ], [
                 self.gui.Button(self.button_load_user,
                                 size=(self.size_button), font=(self.font, 15)),
-                self.gui.Button(self.button_save,
+                self.gui.Button(self.button_create_user,
                                 size=(self.size_button), font=(self.font, 15)),
             ], [
                 self.gui.Button(self.button_clear, size=(self.size_button),
@@ -101,15 +102,34 @@ class AverageCalculator():
 
     def main(self):
         """A program to store arbitrary values and return the average"""
+        if self.settings['first_load']:
+            username = self.gui.popup_get_text(
+                'Welcome!\nPlease enter your name')
+            self.settings['username'] = username
+            self.settings['last_user'] = username
+            self.username = self.settings['username'].strip().lower()
+            self.filename = self.settings['username']
+            self.file_path = self.os.path.join(
+                self.os.getcwd(), (self.username + '.json'))
+            self._save_file()
+            self.settings['first_load'] = False
+            self._save_settings()
+
+        else:
+            self.username = self.settings['username']
 
         while True:
             event, values = self.window.read()
+            self.window['-USERNAME-'].update(
+                'Welcome back, ' + self._get_username() + '!')
             #  Program quit
             if event == self.gui.WIN_CLOSED or event == self.button_quit:
                 #  Save the data in the current directory
                 #  TODO: Change this to save at file location as per where
                 #        the program is being run from.
                 self._save_file()
+                self.settings['last_user'] = self.username
+                self._save_settings()
                 break
 
             #  The user added a new score
@@ -124,7 +144,7 @@ class AverageCalculator():
                     self.gui.popup(
                         f'Please enter only numbers from 0 to 300\n{e}')
 
-            if event == self.button_save:
+            if event == self.button_create_user:
                 #  !Must fix this
                 self._create_user()
 
@@ -154,11 +174,11 @@ class AverageCalculator():
                 return json.load(f)
         except:
             with open('settings.json', 'w') as f:
-                return {}
+                return {'first_load': True, 'username': '', 'last_user': ''}
 
     def _save_settings(self):
-        with open(self.settings, 'w') as f:
-            json.dump(self.settngs, f)
+        with open(self.setting_file_path, 'w') as f:
+            json.dump(self.settings, f)
 
     def _update_display_field(self, field_to_update, text_output):
         """Updates the average score display in the program"""
@@ -178,6 +198,7 @@ class AverageCalculator():
 
     def _get_username(self):
         """Extract the username from the file loaded"""
+        return self.settings['username'].title()
         return self.filename.split('.')[0].title()
 
     def _load_user(self):
@@ -210,7 +231,7 @@ class AverageCalculator():
     def _save_file(self):
 
         #  Makes sure there is something new to write to the file
-        if self.add_score_successful or self.create_new_user:
+        if self.add_score_successful or self.create_new_user or self.settings['first_load']:
             print('File Saved')
             print(self.file_path)
             with open(self.file_path, 'w') as f:
@@ -220,24 +241,26 @@ class AverageCalculator():
     def _create_user(self):
         #!Needs work. Plenty
         # TODO: Get the directory from values, call the Create User method. Add a popup if successful or not
-        filename = self.gui.popup_get_text('Enter Username', keep_on_top=True, font=(
+        username = self.gui.popup_get_text('Enter Username', keep_on_top=True, font=(
             self.font, 15))
-        if len(filename) > 35:
+        if len(username) > 35:
             self.gui.popup('Error\nThe username is too long', keep_on_top=True,
                            font=(self.font, 15), button_color=(self.color_button))
         else:
             try:
                 # TODO: Check the current directory if a user already exists
-                if any(not c.isalnum() for c in filename.strip().lower()):
+                if any(not c.isalnum() for c in username.strip().lower()):
                     sg.popup('Error\nNo special characters or spaces allowed', keep_on_top=True, font=(
                         self.font, 15), button_color=(self.color_button))
                 else:
-                    filename = filename.strip().lower()
+                    username = username.strip().lower()
                     self.file_path = os.path.join(
-                        os.getcwd(), (filename + '.json'))
+                        os.getcwd(), (username + '.json'))
                     print(self.working_directory)
                     self.create_new_user = True
-                    self.data = {}
+                    self.settings['username'] = username
+                    self.settings['last_user'] = username
+                    self.data = self._load_user()
                     self._save_file()
             except:
                 pass
