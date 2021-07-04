@@ -316,9 +316,10 @@ class AverageCalculator():
             dates.append(self.datetime.date(year, month, day).isoformat())
 
         scores = [math.ceil(mean(date)) for date in self.data.values()]
-        fig, ax = plt.subplots()
-        ax.plot(dates, scores)
-        ax.set(xlabel='Dates', ylabel='Average Words Per Minute',
+        fig, ax = self.plt.subplots(facecolor=(.25, .25, .25))
+        ax.set_facecolor('#6C6C6C')
+        ax.plot(dates, scores, color='b')
+        ax.set(xlabel='Dates', ylabel='Average WPM',
                title=f"{self.username.title()}'s Average Scores")
         ax.grid()
         self.plt.show(block=False)
