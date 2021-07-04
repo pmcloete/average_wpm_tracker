@@ -171,8 +171,15 @@ class AverageCalculator():
                 self.settings['file_path'] = self.file_path
                 self._save_settings()
             else:
+                self._load_settings()
+                self.file_path = self.settings['file_path']
                 self.username = self.settings['username']
+                self._load_user()
+                print(self.data)
+                print(self.file_path)
+                print(self._get_average())
         except Exception as e:
+            print(e)
             quit()
 
     def _load_settings(self):
@@ -225,6 +232,7 @@ class AverageCalculator():
 
     def _load_new_user(self):
         """Loads a different user"""
+        self._save_file()
         try:
             self.file_path = self.gui.popup_get_file("Select the user's file", keep_on_top=True, font=(
                 self.font, 15), button_color=(self.color_button))
