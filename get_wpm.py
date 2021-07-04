@@ -123,6 +123,7 @@ class AverageCalculator():
                         self.add_score_successful = 1
                 except Exception as e:
                     # Add a popup to indicate a non integer value
+                    print(e)
                     self.gui.popup(
                         f'Please enter only numbers from 0 to 300\n{e}')
 
@@ -134,6 +135,7 @@ class AverageCalculator():
 
             if event == self.button_load_user:
                 self._load_new_user()
+                self.username = self._get_username()
                 self.window['-USERNAME-'].update(
                     'Welcome back, ' + self._get_username() + '!')
 
@@ -167,6 +169,7 @@ class AverageCalculator():
                     self.os.getcwd(), (self.username + '.json'))
                 self._save_file()
                 self.settings['first_load'] = False
+                self.settings['file_path'] = self.file_path
                 self._save_settings()
             else:
                 self.username = self.settings['username']
@@ -181,7 +184,8 @@ class AverageCalculator():
                 return json.load(f)
         except:
             with open('settings.json', 'w') as f:
-                return {'first_load': True, 'username': '', 'last_user': ''}
+                return {'first_load': True, 'username': '', 'last_user': '',
+                        'file_path': ''}
 
     def _save_settings(self):
         """Save the settings file"""
