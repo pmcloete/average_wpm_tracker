@@ -75,7 +75,7 @@ class AverageCalculator():
         self.layout = [
             [self.gui.Text(
                 (f'Hi, {self.username.title()}'), size=(40, 1), justification='left', font=(self.font, 15), key='-USERNAME-')],
-            [self.gui.Text(self.wpm_display,
+            [self.gui.Text('Average: ' + str(self.current_average) + ' WPM',
                            size=(20, 1),
                            justification='left', font=(self.font, 25),
                            key='-AVERAGE-')
@@ -109,8 +109,6 @@ class AverageCalculator():
                 #  TODO: Change this to save at file location as per where
                 #        the program is being run from.
                 self._save_file()
-                # self.settings['last_user'] = self.username
-                # self.settings['file_path'] = self.file_path
                 self._save_settings()
                 break
 
@@ -174,10 +172,8 @@ class AverageCalculator():
                 self._load_settings()
                 self.file_path = self.settings['file_path']
                 self.username = self.settings['username']
-                self._load_user()
-                print(self.data)
-                print(self.file_path)
-                print(self._get_average())
+                self.data = self._load_user()
+                self.current_average = self._get_average()
         except Exception as e:
             print(e)
             quit()
