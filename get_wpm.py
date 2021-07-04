@@ -101,7 +101,6 @@ class AverageCalculator():
         #  Create the App window
         self.window = self.gui.Window('Average WPM Calculator', self.layout,
                                       return_keyboard_events=True)
-        print(self.username)
         while True:
             event, values = self.window.read()
             #  Program quit
@@ -110,7 +109,8 @@ class AverageCalculator():
                 #  TODO: Change this to save at file location as per where
                 #        the program is being run from.
                 self._save_file()
-                self.settings['last_user'] = self.username
+                # self.settings['last_user'] = self.username
+                # self.settings['file_path'] = self.file_path
                 self._save_settings()
                 break
 
@@ -135,7 +135,6 @@ class AverageCalculator():
 
             if event == self.button_load_user:
                 self._load_new_user()
-                self.username = self._get_username()
                 self.window['-USERNAME-'].update(
                     'Welcome back, ' + self._get_username() + '!')
 
@@ -229,11 +228,17 @@ class AverageCalculator():
         try:
             self.file_path = self.gui.popup_get_file("Select the user's file", keep_on_top=True, font=(
                 self.font, 15), button_color=(self.color_button))
-            self.filename = self.file_path.split('/')[-1]
-            with open(self.file_path, 'r') as f:
-                self.data = json.load(f)
-        except:
-            pass
+            if self.file_path is None:
+                pass
+            else:
+                self.filename = self.file_path.split('/')[-1]
+                self.settings['last_user'] = self.filename.split('.')[0]
+                self.settings['username'] = self.settings['last_user']
+                self.settings['file_path'] = self.file_path
+                with open(self.file_path, 'r') as f:
+                    self.data = json.load(f)
+        except Exception as e:
+            print(e)
 
     def _save_file(self):
         """Saves a users file to disk"""
